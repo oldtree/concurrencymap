@@ -78,24 +78,52 @@ func TestConcurrencyMapWithLock_Remove(t *testing.T) {
 
 func Benchmark_ConcurrencyMapWithLock_Add(tb *testing.B) {
 	for index := 0; index < tb.N; index++ {
-		num := r.Int()
-		lm.Add(num, answers[num%length])
+		go func() {
+			num := r.Int()
+			lm.Add(num, answers[num%length])
+		}()
 	}
 }
 
 func Benchmark_ConcurrencyMapWithLock_Get(tb *testing.B) {
 	for index := 0; index < tb.N; index++ {
-		num := r.Int()
-		if lm.Get(num) != answers[num%length] {
-			tb.Failed()
-		}
+		go func() {
+			num := r.Int()
+			if lm.Get(num) != answers[num%length] {
+				tb.Failed()
+			}
+		}()
 	}
 }
 
 func Benchmark_ConcurrencyMapWithLock_Remove(tb *testing.B) {
 	for index := 0; index < tb.N; index++ {
+		go func() {
+			num := r.Int()
+			lm.Remove(num)
+		}()
+	}
+}
+
+func Benchmark_ConcurrencyMapWithLock_Random(tb *testing.B) {
+	for index := 0; index < tb.N; index++ {
 		num := r.Int()
-		lm.Remove(num)
+		switch num % 3 {
+		case 0:
+			go func(n int) {
+				lm.Add(n, answers[num%length])
+			}(num)
+		case 1:
+			go func(n int) {
+				if lm.Get(n) != answers[num%length] {
+					tb.Failed()
+				}
+			}(num)
+		case 2:
+			go func(n int) {
+				lm.Remove(n)
+			}(num)
+		}
 	}
 }
 
@@ -138,17 +166,43 @@ func Benchmark_ConcurrencyMapWithChan_Add(tb *testing.B) {
 
 func Benchmark_ConcurrencyMapWithChan_Get(tb *testing.B) {
 	for index := 0; index < tb.N; index++ {
-		num := r.Int()
-		if lc.Get(num) != answers[num%length] {
-			tb.Failed()
-		}
+		go func() {
+			num := r.Int()
+			if lc.Get(num) != answers[num%length] {
+				tb.Failed()
+			}
+		}()
 	}
 }
 
 func Benchmark_ConcurrencyMapWithChan_Remove(tb *testing.B) {
 	for index := 0; index < tb.N; index++ {
+		go func() {
+			num := r.Int()
+			lc.Remove(num)
+		}()
+	}
+}
+
+func Benchmark_ConcurrencyMapWithChan_Random(tb *testing.B) {
+	for index := 0; index < tb.N; index++ {
 		num := r.Int()
-		lc.Remove(num)
+		switch num % 3 {
+		case 0:
+			go func(n int) {
+				lc.Add(n, answers[num%length])
+			}(num)
+		case 1:
+			go func(n int) {
+				if lc.Get(n) != answers[num%length] {
+					tb.Failed()
+				}
+			}(num)
+		case 2:
+			go func(n int) {
+				lc.Remove(n)
+			}(num)
+		}
 	}
 }
 
@@ -183,23 +237,51 @@ func TestConcurrencyMapWithRWLock_Remove(t *testing.T) {
 
 func Benchmark_ConcurrencyMapWithRWLock_Add(tb *testing.B) {
 	for index := 0; index < tb.N; index++ {
-		num := r.Int()
-		lr.Add(num, answers[num%length])
+		go func() {
+			num := r.Int()
+			lr.Add(num, answers[num%length])
+		}()
 	}
 }
 
 func Benchmark_ConcurrencyMapWithRWLock_Get(tb *testing.B) {
 	for index := 0; index < tb.N; index++ {
-		num := r.Int()
-		if lr.Get(num) != answers[num%length] {
-			tb.Failed()
-		}
+		go func() {
+			num := r.Int()
+			if lr.Get(num) != answers[num%length] {
+				tb.Failed()
+			}
+		}()
 	}
 }
 
 func Benchmark_ConcurrencyMapWithRWLock_Remove(tb *testing.B) {
 	for index := 0; index < tb.N; index++ {
+		go func() {
+			num := r.Int()
+			lr.Remove(num)
+		}()
+	}
+}
+
+func Benchmark_ConcurrencyMapWithRWLock_Random(tb *testing.B) {
+	for index := 0; index < tb.N; index++ {
 		num := r.Int()
-		lr.Remove(num)
+		switch num % 3 {
+		case 0:
+			go func(n int) {
+				lr.Add(n, answers[num%length])
+			}(num)
+		case 1:
+			go func(n int) {
+				if lr.Get(n) != answers[num%length] {
+					tb.Failed()
+				}
+			}(num)
+		case 2:
+			go func(n int) {
+				lr.Remove(n)
+			}(num)
+		}
 	}
 }
